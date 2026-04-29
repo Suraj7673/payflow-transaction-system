@@ -1,0 +1,27 @@
+package com.payflow.dto;
+
+import java.math.BigDecimal;
+
+public class AddBalanceRequest {
+
+    private int userId;
+    private BigDecimal amount;
+
+    public AddBalanceRequest() {}
+
+    public int getUserId() {
+        return userId;
+    }
+
+    public void setUserId(int userId) {
+        this.userId = userId;
+    }
+
+    public BigDecimal getAmount() {
+        return amount;
+    }
+
+    public void setAmount(BigDecimal amount) {
+        this.amount = amount;
+    }
+}
