@@ -1,85 +1,75 @@
-# 💰 PayFlow – Transaction Processing System
+# PayFlow – Transaction System
 
-## 🚀 Overview
+## What is this?
 
-A backend system inspired by real payment platforms. Supports user management, wallets, secure money transfers, and transaction history with ACID guarantees.
+This is a backend project where users can create accounts, add money to their wallet, and transfer money to other users.
+
+I built this to understand how real payment systems handle transactions safely.
 
 ---
 
-## 🛠 Tech Stack
+## Features
 
-* Java 17, Spring Boot
-* JDBC (JdbcTemplate)
+* Create user
+* Auto-create wallet for each user
+* Add balance
+* Transfer money between users
+* Check balance
+* Store transaction history (success / failed)
+
+---
+
+## What I focused on
+
+The main goal was to make sure money transfer is safe.
+
+* Used transactions (`@Transactional`) so money is not lost
+* Checked for insufficient balance
+* Prevented duplicate users using unique email
+* Stored every transfer in database
+
+---
+
+## Tech Used
+
+* Java
+* Spring Boot
+* JDBC
 * MySQL
-* (Optional) React for UI
 
 ---
 
-## 🧱 Architecture
+## How to run
 
-```
-com.payflow
-├── controller
-├── service
-├── repository
-├── dto
-├── model
-```
-
----
-
-## ✨ Features
-
-* **User Management**: create user, unique email validation
-* **Wallet System**: auto-create wallet, add/check balance
-* **Transfers**: debit + credit with `@Transactional` (atomic)
-* **History**: SUCCESS / FAILED records for every transfer
-* **Validation**: insufficient balance, invalid user
-* **Security (basic)**: JWT token for protected endpoints
-
----
-
-## 🔐 Data Integrity
-
-* DB constraints (UNIQUE, NOT NULL, FK)
-* Transaction rollback on failure
-
----
-
-## 🧪 API Endpoints
-
-* `POST /users`
-* `POST /users/add-balance`
-* `POST /users/transfer` *(JWT secured)*
-* `GET /users/balance/{userId}`
-* `POST /auth/login` → returns JWT
-
----
-
-## ▶️ Run Locally
-
-1. Clone repo
-2. Configure DB in `application.properties`
-3. Run Spring Boot app
+1. Clone the repo
+2. Update database config in `application.properties`
+3. Run the Spring Boot app
 4. Use Postman to test APIs
 
 ---
 
-## 🧠 Key Learnings
+## APIs
 
-* Layered architecture
-* ACID transactions with Spring
-* Handling DB constraints & failures
-* Building secure REST APIs
+* POST /users → create user
+* POST /users/add-balance
+* POST /users/transfer
+* GET /users/balance/{userId}
 
 ---
 
-## 🚀 Future Improvements
+## What I learned
 
-* Full Spring Security config
-* Better error responses (global handler)
-* Concurrency control (locking)
-* Swagger docs
+* How transactions work in backend
+* Why atomic operations are important in payments
+* How to structure a backend project properly
+* Handling edge cases like invalid users and low balance
 
+---
 
+## Future improvements
 
+* Add authentication (JWT)
+* Better error handling
+* Improve API responses
+
+---
