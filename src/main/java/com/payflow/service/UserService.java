@@ -3,10 +3,10 @@ package com.payflow.service;
 import com.payflow.dto.AddBalanceRequest;
 import com.payflow.dto.CreateUserRequest;
 import com.payflow.dto.TransferRequest;
+import com.payflow.model.User;
 import com.payflow.repository.TransactionRepository;
 import com.payflow.repository.UserRepository;
 import com.payflow.repository.WalletRepository;
-import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -25,9 +25,9 @@ public class UserService {
         this.userRepository = userRepository;
         this.walletRepository = walletRepository;
         this.transactionRepository = transactionRepository;
-
     }
 
+    // ================= GET BALANCE =================
     public BigDecimal getBalance(int userId) {
         return walletRepository.getBalance(userId);
     }
@@ -40,17 +40,22 @@ public class UserService {
         }
 
         try {
-            int userId = userRepository.saveUser(
-                    request.getName(),
-                    request.getEmail()
-            );
+            // Create User (JPA)
+            User user = new User();
+            user.setEmail(request.getEmail());
+            user.setPassword("default"); // temporary
 
+            User savedUser = userRepository.save(user);
+
+            int userId = savedUser.getId().intValue();
+
+            // Create wallet (JDBC)
             walletRepository.createWallet(userId);
 
             return "User + Wallet created successfully";
 
-        } catch (DuplicateKeyException e) {
-            return "Email already exists";
+        } catch (Exception e) {
+            return "Email already exists or error occurred";
         }
     }
 
@@ -94,6 +99,7 @@ public class UserService {
             BigDecimal senderBalance =
                     walletRepository.getBalance(request.getFromUserId());
 
+            // Check balance
             if (senderBalance.compareTo(request.getAmount()) < 0) {
 
                 transactionRepository.saveTransaction(
@@ -106,13 +112,13 @@ public class UserService {
                 return "Insufficient balance";
             }
 
-            // Deduct
+            // Deduct from sender
             walletRepository.updateBalance(
                     request.getFromUserId(),
                     senderBalance.subtract(request.getAmount())
             );
 
-            // Add
+            // Add to receiver
             BigDecimal receiverBalance =
                     walletRepository.getBalance(request.getToUserId());
 
@@ -121,7 +127,7 @@ public class UserService {
                     receiverBalance.add(request.getAmount())
             );
 
-            // SUCCESS record
+            // Save SUCCESS transaction
             transactionRepository.saveTransaction(
                     request.getFromUserId(),
                     request.getToUserId(),

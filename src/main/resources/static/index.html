@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Payflow Workable UI</title>
+</head>
+<body>
+<h2>Transfer Money</h2>
+
+<label>From User ID:</label>
+<input type="number" id="fromUserId"><br><br>
+
+<label>To User ID:</label>
+<input type="number" id="toUserId"><br><br>
+
+<label>Amount:</label>
+<input type="number" id="amount"><br><br>
+
+<button onclick="sendTransfer()">Pay</button>
+
+<p id="result"></p>
+
+<script>
+    function sendTransfer() {
+        const payload = {
+            fromUserId: document.getElementById('fromUserId').value,
+            toUserId: document.getElementById('toUserId').value,
+            amount: document.getElementById('amount').value
+        };
+
+        fetch('/users/transfer', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        })
+            .then(response => response.text())
+            .then(data => {
+                document.getElementById('result').innerText = "Result: " + data;
+            })
+            .catch(error => {
+                document.getElementById('result').innerText = "Error connecting to server.";
+            });
+    }
+</script>
+</body>
+</html>
