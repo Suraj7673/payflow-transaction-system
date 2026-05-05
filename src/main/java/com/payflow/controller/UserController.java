@@ -18,13 +18,11 @@ public class UserController {
         this.userService = userService;
     }
 
-    // ✅ Create user + wallet
     @PostMapping("/create")
     public String createUser(@RequestBody CreateUserRequest request) {
         return userService.createUser(request);
     }
 
-    // ✅ Add balance
     @PostMapping("/add-balance")
     public String addBalance(@RequestBody AddBalanceRequest request) {
         return userService.addBalance(request);

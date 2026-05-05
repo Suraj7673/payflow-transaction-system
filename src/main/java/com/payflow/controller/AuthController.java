@@ -28,7 +28,7 @@ public class AuthController {
             throw new RuntimeException("Invalid password");
         }
 
-        // ✅ STATIC CALL (correct)
+
         String token = JwtUtil.generateToken(user.getEmail());
 
         return Map.of("token", token);

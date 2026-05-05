@@ -13,7 +13,7 @@ public class JwtUtil {
 
     private static final long EXPIRATION = 1000 * 60 * 60; // 1 hour
 
-    // ✅ THIS METHOD MUST EXIST
+
     public static String generateToken(String email) {
         return Jwts.builder()
                 .setSubject(email)
@@ -23,7 +23,7 @@ public class JwtUtil {
                 .compact();
     }
 
-    // ✅ ALSO REQUIRED
+
     public static String extractEmail(String token) {
         try {
             return Jwts.parserBuilder()

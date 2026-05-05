@@ -30,7 +30,6 @@ public class UserService {
         this.transactionRepository = transactionRepository;
     }
 
-    // 🔐 Get balance
     public BigDecimal getMyBalance(String email) {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("User not found"));
@@ -41,7 +40,6 @@ public class UserService {
         return wallet.getBalance();
     }
 
-    // ✅ Create user + wallet
     public String createUser(CreateUserRequest request) {
 
         if (request.getEmail() == null) return "Invalid input";
@@ -63,7 +61,6 @@ public class UserService {
         }
     }
 
-    // 💰 Add balance
     public String addBalance(AddBalanceRequest request) {
 
         if (request.getAmount() == null || request.getAmount().compareTo(BigDecimal.ZERO) <= 0) {
@@ -87,7 +84,6 @@ public class UserService {
         }
     }
 
-    // 🔥 Transfer
     @Transactional
     public String transfer(TransferRequest request, String senderEmail) {
 
@@ -134,7 +130,7 @@ public class UserService {
         }
     }
 
-    // 📜 Transaction history
+
     public List<Transaction> getMyTransactions(String email) {
 
         User user = userRepository.findByEmail(email)
