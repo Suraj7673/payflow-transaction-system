@@ -4,20 +4,10 @@ import java.math.BigDecimal;
 
 public class TransferRequest {
 
-    private int fromUserId;
     private int toUserId;
     private BigDecimal amount;
 
-    public TransferRequest() {}
-
-    public int getFromUserId() {
-        return fromUserId;
-    }
-
-    public void setFromUserId(int fromUserId) {
-        this.fromUserId = fromUserId;
-    }
-
+    // Getters and Setters
     public int getToUserId() {
         return toUserId;
     }

@@ -1,31 +1,11 @@
 package com.payflow.repository;
 
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.stereotype.Repository;
+import com.payflow.model.Wallet;
+import com.payflow.model.User;
+import org.springframework.data.jpa.repository.JpaRepository;
 
-import java.math.BigDecimal;
+import java.util.Optional;
 
-@Repository
-public class WalletRepository {
-
-    private final JdbcTemplate jdbcTemplate;
-
-    public WalletRepository(JdbcTemplate jdbcTemplate) {
-        this.jdbcTemplate = jdbcTemplate;
-    }
-
-    public void createWallet(int userId) {
-        String sql = "INSERT INTO wallets(user_id, balance) VALUES (?, 0)";
-        jdbcTemplate.update(sql, userId);
-    }
-
-    public BigDecimal getBalance(int userId) {
-        String sql = "SELECT balance FROM wallets WHERE user_id = ?";
-        return jdbcTemplate.queryForObject(sql, BigDecimal.class, userId);
-    }
-
-    public void updateBalance(int userId, BigDecimal newBalance) {
-        String sql = "UPDATE wallets SET balance = ? WHERE user_id = ?";
-        jdbcTemplate.update(sql, newBalance, userId);
-    }
+public interface WalletRepository extends JpaRepository<Wallet, Long> {
+    Optional<Wallet> findByUser(User user);
 }

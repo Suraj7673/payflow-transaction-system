@@ -1,24 +1,11 @@
 package com.payflow.repository;
 
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.stereotype.Repository;
+import com.payflow.model.Transaction;
+import org.springframework.data.jpa.repository.JpaRepository;
 
-import java.math.BigDecimal;
+import java.util.List;
 
-@Repository
-public class TransactionRepository {
+public interface TransactionRepository extends JpaRepository<Transaction, Long> {
 
-    private final JdbcTemplate jdbcTemplate;
-
-    public TransactionRepository(JdbcTemplate jdbcTemplate) {
-        this.jdbcTemplate = jdbcTemplate;
-    }
-
-    public void saveTransaction(int fromUserId, int toUserId,
-                                BigDecimal amount, String status) {
-
-        String sql = "INSERT INTO transactions(from_user_id, to_user_id, amount, status) VALUES (?, ?, ?, ?)";
-
-        jdbcTemplate.update(sql, fromUserId, toUserId, amount, status);
-    }
+    List<Transaction> findByFromUserIdOrToUserIdOrderByCreatedAtDesc(Long fromUserId, Long toUserId);
 }

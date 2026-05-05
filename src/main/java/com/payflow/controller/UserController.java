@@ -6,8 +6,10 @@ import com.payflow.dto.TransferRequest;
 import com.payflow.service.UserService;
 import org.springframework.web.bind.annotation.*;
 
+import java.security.Principal;
+
 @RestController
-@RequestMapping("/users")
+@RequestMapping("/user")
 public class UserController {
 
     private final UserService userService;
@@ -15,22 +17,22 @@ public class UserController {
     public UserController(UserService userService) {
         this.userService = userService;
     }
-    @GetMapping("/balance/{userId}")
-    public String getBalance(@PathVariable int userId) {
-        return userService.getBalance(userId).toString();
-    }
-    @PostMapping
+
+    // ✅ Create user + wallet
+    @PostMapping("/create")
     public String createUser(@RequestBody CreateUserRequest request) {
         return userService.createUser(request);
     }
 
+    // ✅ Add balance
     @PostMapping("/add-balance")
     public String addBalance(@RequestBody AddBalanceRequest request) {
         return userService.addBalance(request);
     }
-
     @PostMapping("/transfer")
-    public String transfer(@RequestBody TransferRequest request) {
-        return userService.transfer(request);
+    public String transfer(@RequestBody TransferRequest request, Principal principal) {
+        return userService.transfer(request, principal.getName());
     }
+
+
 }

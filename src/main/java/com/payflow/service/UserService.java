@@ -3,7 +3,9 @@ package com.payflow.service;
 import com.payflow.dto.AddBalanceRequest;
 import com.payflow.dto.CreateUserRequest;
 import com.payflow.dto.TransferRequest;
+import com.payflow.model.Transaction;
 import com.payflow.model.User;
+import com.payflow.model.Wallet;
 import com.payflow.repository.TransactionRepository;
 import com.payflow.repository.UserRepository;
 import com.payflow.repository.WalletRepository;
@@ -11,6 +13,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 @Service
 public class UserService {
@@ -27,30 +30,31 @@ public class UserService {
         this.transactionRepository = transactionRepository;
     }
 
-    // ================= GET BALANCE =================
-    public BigDecimal getBalance(int userId) {
-        return walletRepository.getBalance(userId);
+    // 🔐 Get balance
+    public BigDecimal getMyBalance(String email) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        Wallet wallet = walletRepository.findByUser(user)
+                .orElseThrow(() -> new RuntimeException("Wallet not found"));
+
+        return wallet.getBalance();
     }
 
-    // ================= CREATE USER =================
+    // ✅ Create user + wallet
     public String createUser(CreateUserRequest request) {
 
-        if (request.getName() == null || request.getEmail() == null) {
-            return "Invalid input";
-        }
+        if (request.getEmail() == null) return "Invalid input";
 
         try {
-            // Create User (JPA)
             User user = new User();
             user.setEmail(request.getEmail());
-            user.setPassword("default"); // temporary
+            user.setPassword("default");
 
             User savedUser = userRepository.save(user);
 
-            int userId = savedUser.getId().intValue();
-
-            // Create wallet (JDBC)
-            walletRepository.createWallet(userId);
+            Wallet wallet = new Wallet(savedUser);
+            walletRepository.save(wallet);
 
             return "User + Wallet created successfully";
 
@@ -59,94 +63,87 @@ public class UserService {
         }
     }
 
-    // ================= ADD BALANCE =================
+    // 💰 Add balance
     public String addBalance(AddBalanceRequest request) {
 
-        if (request.getAmount() == null ||
-                request.getAmount().compareTo(BigDecimal.ZERO) <= 0) {
+        if (request.getAmount() == null || request.getAmount().compareTo(BigDecimal.ZERO) <= 0) {
             return "Invalid amount";
         }
 
         try {
-            BigDecimal currentBalance =
-                    walletRepository.getBalance(request.getUserId());
+            User user = userRepository.findById((long) request.getUserId())
+                    .orElseThrow(() -> new RuntimeException("User not found"));
 
-            BigDecimal newBalance =
-                    currentBalance.add(request.getAmount());
+            Wallet wallet = walletRepository.findByUser(user)
+                    .orElseThrow(() -> new RuntimeException("Wallet not found"));
 
-            walletRepository.updateBalance(
-                    request.getUserId(),
-                    newBalance
-            );
+            wallet.setBalance(wallet.getBalance().add(request.getAmount()));
+            walletRepository.save(wallet);
 
             return "Balance updated successfully";
 
         } catch (Exception e) {
-            return "User not found or error occurred";
+            return "Error: " + e.getMessage();
         }
     }
 
-    // ================= TRANSFER =================
+    // 🔥 Transfer
     @Transactional
-    public String transfer(TransferRequest request) {
+    public String transfer(TransferRequest request, String senderEmail) {
 
-        if (request.getAmount() == null ||
-                request.getAmount().compareTo(BigDecimal.ZERO) <= 0) {
+        if (request.getAmount() == null || request.getAmount().compareTo(BigDecimal.ZERO) <= 0) {
             return "Invalid amount";
         }
 
         try {
-            BigDecimal senderBalance =
-                    walletRepository.getBalance(request.getFromUserId());
+            User sender = userRepository.findByEmail(senderEmail)
+                    .orElseThrow(() -> new RuntimeException("Sender not found"));
 
-            // Check balance
-            if (senderBalance.compareTo(request.getAmount()) < 0) {
+            Wallet senderWallet = walletRepository.findByUser(sender)
+                    .orElseThrow(() -> new RuntimeException("Sender wallet not found"));
 
-                transactionRepository.saveTransaction(
-                        request.getFromUserId(),
-                        request.getToUserId(),
-                        request.getAmount(),
-                        "FAILED"
+            User receiver = userRepository.findById((long) request.getToUserId())
+                    .orElseThrow(() -> new RuntimeException("Receiver not found"));
+
+            Wallet receiverWallet = walletRepository.findByUser(receiver)
+                    .orElseThrow(() -> new RuntimeException("Receiver wallet not found"));
+
+            if (senderWallet.getBalance().compareTo(request.getAmount()) < 0) {
+
+                transactionRepository.save(
+                        new Transaction(sender.getId(), receiver.getId(), request.getAmount(), "FAILED")
                 );
 
                 return "Insufficient balance";
             }
 
-            // Deduct from sender
-            walletRepository.updateBalance(
-                    request.getFromUserId(),
-                    senderBalance.subtract(request.getAmount())
-            );
+            senderWallet.setBalance(senderWallet.getBalance().subtract(request.getAmount()));
+            receiverWallet.setBalance(receiverWallet.getBalance().add(request.getAmount()));
 
-            // Add to receiver
-            BigDecimal receiverBalance =
-                    walletRepository.getBalance(request.getToUserId());
+            walletRepository.save(senderWallet);
+            walletRepository.save(receiverWallet);
 
-            walletRepository.updateBalance(
-                    request.getToUserId(),
-                    receiverBalance.add(request.getAmount())
-            );
-
-            // Save SUCCESS transaction
-            transactionRepository.saveTransaction(
-                    request.getFromUserId(),
-                    request.getToUserId(),
-                    request.getAmount(),
-                    "SUCCESS"
+            transactionRepository.save(
+                    new Transaction(sender.getId(), receiver.getId(), request.getAmount(), "SUCCESS")
             );
 
             return "Transfer successful";
 
         } catch (Exception e) {
-
-            transactionRepository.saveTransaction(
-                    request.getFromUserId(),
-                    request.getToUserId(),
-                    request.getAmount(),
-                    "FAILED"
-            );
-
-            throw new RuntimeException("Transfer failed");
+            throw new RuntimeException("System error: " + e.getMessage());
         }
+    }
+
+    // 📜 Transaction history
+    public List<Transaction> getMyTransactions(String email) {
+
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        return transactionRepository
+                .findByFromUserIdOrToUserIdOrderByCreatedAtDesc(
+                        user.getId(),
+                        user.getId()
+                );
     }
 }

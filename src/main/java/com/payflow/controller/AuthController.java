@@ -13,12 +13,9 @@ import java.util.Map;
 public class AuthController {
 
     private final UserRepository userRepository;
-    private final JwtUtil jwtUtil;
 
-    public AuthController(UserRepository userRepository,
-                          JwtUtil jwtUtil) {
+    public AuthController(UserRepository userRepository) {
         this.userRepository = userRepository;
-        this.jwtUtil = jwtUtil;
     }
 
     @PostMapping("/login")
@@ -31,7 +28,8 @@ public class AuthController {
             throw new RuntimeException("Invalid password");
         }
 
-        String token = jwtUtil.generateToken(user.getEmail());
+        // ✅ STATIC CALL (correct)
+        String token = JwtUtil.generateToken(user.getEmail());
 
         return Map.of("token", token);
     }
