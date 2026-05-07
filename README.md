@@ -1,75 +1,131 @@
-# PayFlow – Transaction System
+# PayFlow – Wallet & Transaction System
 
-## What is this?
+A full-stack wallet application where users can log in, check balance, transfer money, and view transaction history.
 
-This is a backend project where users can create accounts, add money to their wallet, and transfer money to other users.
-
-I built this to understand how real payment systems handle transactions safely.
+I built this project to understand how secure payment systems work and how frontend and backend communicate in a real-world application.
 
 ---
 
 ## Features
 
-* Create user
-* Auto-create wallet for each user
-* Add balance
-* Transfer money between users
-* Check balance
-* Store transaction history (success / failed)
+- JWT authentication
+- Wallet balance system
+- Transfer money between users
+- Transaction history
+- Failed transaction handling
+- Secure backend APIs
+- React dashboard UI
+
+---
+
+## Screenshots
+
+### Dashboard
+![Dashboard](./screenshots/dashboard.png)
+
+### Transactions
+![Transactions](./screenshots/transactions.png)
+
+### Login
+![Login](./screenshots/login.png)
+
+---
+
+## Tech Stack
+
+### Frontend
+- React
+- Axios
+
+### Backend
+- Java
+- Spring Boot
+- Spring Security
+- JWT Authentication
+
+### Database
+- MySQL
+
+---
+
+## How it works
+
+The frontend communicates with the Spring Boot backend using REST APIs.
+
+The backend:
+- validates JWT tokens
+- manages wallet balances
+- performs secure money transfers
+- stores transaction history in MySQL
+
+Transfers are handled using `@Transactional` to maintain consistency during balance updates.
 
 ---
 
 ## What I focused on
 
-The main goal was to make sure money transfer is safe.
+The main goal was making transfers safe and reliable.
 
-* Used transactions (`@Transactional`) so money is not lost
-* Checked for insufficient balance
-* Prevented duplicate users using unique email
-* Stored every transfer in database
-
----
-
-## Tech Used
-
-* Java
-* Spring Boot
-* JDBC
-* MySQL
+Things I focused on:
+- secure authentication using JWT
+- transaction-safe balance transfers
+- handling insufficient balance cases
+- storing failed transactions
+- frontend and backend integration
+- clean API structure
 
 ---
 
-## How to run
+## API Endpoints
 
-1. Clone the repo
-2. Update database config in `application.properties`
-3. Run the Spring Boot app
-4. Use Postman to test APIs
+### Auth
+- `POST /auth/login`
+
+### Wallet
+- `GET /wallet/balance`
+
+### Transfer
+- `POST /transfer`
+
+### Transactions
+- `GET /transactions`
 
 ---
 
-## APIs
+## Running the project locally
 
-* POST /users → create user
-* POST /users/add-balance
-* POST /users/transfer
-* GET /users/balance/{userId}
+### Backend
+
+1. Configure MySQL in `application.properties`
+2. Run the Spring Boot application
+
+### Frontend
+
+```bash
+cd payflow-ui
+npm install
+npm start
+```
 
 ---
 
 ## What I learned
 
-* How transactions work in backend
-* Why atomic operations are important in payments
-* How to structure a backend project properly
-* Handling edge cases like invalid users and low balance
+- JWT authentication flow
+- React + Spring Boot integration
+- Database transactions and consistency
+- REST API design
+- Error handling in frontend and backend
+- How payment systems maintain balance integrity
 
 ---
 
-## Future improvements
+## Future Improvements
 
-* Add authentication (JWT)
-* Better error handling
-* Improve API responses
+- User registration
+- Email-based transfers
+- Better UI styling
+- Docker deployment
+- Cloud database hosting
 
 ---
